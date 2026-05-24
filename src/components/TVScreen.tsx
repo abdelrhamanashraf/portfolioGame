@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 interface TVScreenProps {
   open: boolean;
   onClose: () => void;
+  initialGame?: string | null;
 }
 
 // ─── Space Shooter Game ───────────────────────────────────────
@@ -611,7 +612,7 @@ function usePong(canvasRef: React.RefObject<HTMLCanvasElement>, active: boolean)
 // ─── TV Screen Component ─────────────────────────────────────
 type GameId = "menu" | "space-shooter" | "snake" | "pong";
 
-const TVScreen = ({ open, onClose }: TVScreenProps) => {
+const TVScreen = ({ open, onClose, initialGame }: TVScreenProps) => {
   const [currentGame, setCurrentGame] = useState<GameId>("menu");
   const [powerOn, setPowerOn] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -626,13 +627,17 @@ const TVScreen = ({ open, onClose }: TVScreenProps) => {
   useEffect(() => {
     if (open) {
       setPowerOn(false);
+      // If launched from Steam, start directly in that game
+      if (initialGame && ["space-shooter", "snake", "pong"].includes(initialGame)) {
+        setCurrentGame(initialGame as GameId);
+      }
       const t = setTimeout(() => setPowerOn(true), 100);
       return () => clearTimeout(t);
     } else {
       setPowerOn(false);
       setCurrentGame("menu");
     }
-  }, [open]);
+  }, [open, initialGame]);
 
   // ESC to go back
   useEffect(() => {

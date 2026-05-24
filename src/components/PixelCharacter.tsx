@@ -32,10 +32,10 @@ const WALK_FRAME_DURATION = 150; // ms per frame
 
 // Walkable floor area boundaries (percentage of image)
 export const BOUNDS = {
-  minX: 2,
-  maxX: 98,
-  minY: 54,
-  maxY: 97,
+  minX: 1,
+  maxX: 97,
+  minY: 59,
+  maxY: 99,
 };
 
 // Obstacle collision boxes (legacy rectangular — now using polygons instead)
@@ -44,18 +44,15 @@ export const OBSTACLES: { minX: number; maxX: number; minY: number; maxY: number
 
 // Polygon obstacle collision shapes (for angled/isometric objects)
 export const POLY_OBSTACLES: { points: { x: number; y: number }[] }[] = [
-  { points: [{x:94.2,y:50.6}, {x:93.9,y:58.6}, {x:87.7,y:55.9}, {x:87.8,y:47.3}] }, // certificate
-  { points: [{x:44.8,y:61}, {x:39.2,y:63.7}, {x:30.8,y:59.1}, {x:32.2,y:52.5}, {x:39.2,y:56.3}, {x:44.5,y:54.3}] }, // desk 1
-  { points: [{x:60,y:54.5}, {x:55.4,y:56.6}, {x:48.7,y:53.2}, {x:60,y:48}] }, // desk 2
-  { points: [{x:64.5,y:55.8}, {x:77.8,y:63.8}, {x:86.6,y:60.2}, {x:86.6,y:54.3}, {x:73,y:47.2}, {x:65.1,y:50.9}] }, // bed
-  { points: [{x:31.5,y:59.6}, {x:28.4,y:61.3}, {x:26.7,y:59.6}, {x:26.3,y:51.6}, {x:32.1,y:51.5}] }, // plant
-  { points: [{x:16.1,y:62.8}, {x:13.7,y:64.7}, {x:10.6,y:63.3}, {x:10.4,y:50}, {x:16.6,y:49.5}] }, // plant 2
-  { points: [{x:1.3,y:73.5}, {x:9,y:77.5}, {x:16.6,y:73.6}, {x:14.6,y:72.6}, {x:14.9,y:69.3}, {x:13.4,y:68.6}, {x:13.5,y:63.9}, {x:11.2,y:63}, {x:6.5,y:65.3}, {x:6.5,y:68.5}, {x:3,y:70.6}, {x:3.1,y:73.5}] }, // tv
-  { points: [{x:22.7,y:77.7}, {x:20.5,y:74.2}, {x:17,y:74.4}, {x:17.1,y:78.2}, {x:20,y:79.7}, {x:21.7,y:79.2}] }, // bean chair
-  { points: [{x:26.4,y:60}, {x:18.5,y:63.9}, {x:13.4,y:61.5}, {x:14.1,y:39.4}, {x:27.4,y:34.3}, {x:30.3,y:36.6}, {x:30.7,y:58.4}] }, // shelf
-  { points: [{x:45.3,y:59.3}, {x:55.7,y:54.2}, {x:44.6,y:54.2}] }, // desk corner
-  { points: [{x:86.5,y:60}, {x:97.9,y:66.2}, {x:97.9,y:54.1}, {x:86.3,y:54.4}] }, // wall right
-  { points: [{x:0.1,y:67.6}, {x:10.7,y:63}, {x:10.2,y:54.2}, {x:0.6,y:53.9}] }, // wall left
+  { points: [{x:88.1,y:60.6}, {x:92.9,y:63.2}, {x:93.2,y:55.7}, {x:88.4,y:53.5}] }, // certificate
+  { points: [{x:78.6,y:69.9}, {x:63.8,y:61.1}, {x:64.2,y:51.9}, {x:73.6,y:47.9}, {x:86.4,y:54.9}, {x:86.4,y:66.1}] }, // bed
+  { points: [{x:60.1,y:59.6}, {x:60.2,y:52.6}, {x:52.7,y:47.9}, {x:47.4,y:50.7}, {x:52.3,y:55.6}, {x:55,y:54.7}, {x:55,y:61.5}, {x:51.1,y:59.1}, {x:46.5,y:62.5}, {x:44.6,y:59.6}, {x:44.7,y:66.5}, {x:39.3,y:69.3}, {x:30.6,y:64.8}, {x:30.8,y:56.7}, {x:39.1,y:61.1}, {x:31.2,y:56.5}, {x:38.3,y:52.9}, {x:44.5,y:59.2}, {x:52.5,y:55.4}, {x:55.5,y:61.5}] }, // desk
+  { points: [{x:31.1,y:65.6}, {x:27,y:65.7}, {x:26.7,y:55.1}, {x:30.7,y:55.1}] }, // plant
+  { points: [{x:26.4,y:65.5}, {x:18.3,y:70}, {x:14.1,y:68.9}, {x:14.5,y:43.5}, {x:27,y:37.8}, {x:29.9,y:39.4}, {x:30.2,y:54.5}] }, // shelf
+  { points: [{x:16.8,y:74}, {x:8.5,y:78.8}, {x:0.1,y:74}, {x:2.5,y:72.5}, {x:1.7,y:71.4}, {x:6,y:69}, {x:5.5,y:67.4}, {x:5.8,y:64.3}, {x:9.8,y:62.4}, {x:10.9,y:62.9}, {x:13.3,y:63.8}, {x:13.5,y:68.6}, {x:14.5,y:69.5}, {x:14.6,y:72.7}] }, // tv
+  { points: [{x:15.3,y:77.2}, {x:17.4,y:76.1}, {x:18.5,y:76.3}, {x:18.9,y:75.2}, {x:20,y:74.2}, {x:21.4,y:73.5}, {x:23.2,y:73.3}, {x:24.6,y:74.1}, {x:25.9,y:76.3}, {x:26.4,y:78.8}, {x:25.9,y:80.7}, {x:24.8,y:82.4}, {x:22.7,y:83.4}, {x:20.7,y:83.5}, {x:18.7,y:83.5}, {x:16.6,y:82.9}, {x:14.9,y:82.1}, {x:13.9,y:80.8}, {x:13.7,y:79.2}] }, // chair
+  { points: [{x:86.4,y:66}, {x:97.2,y:71.7}, {x:97.4,y:59.5}, {x:86.2,y:59}] }, // wall
+  { points: [{x:53.3,y:60.6}, {x:44.8,y:64.8}, {x:45,y:60.1}] }, // desk corner
 ];
 
 // Point-in-polygon test using ray casting algorithm
@@ -73,12 +70,9 @@ function pointInPolygon(px: number, py: number, polygon: { x: number; y: number 
 
 // Hotspot proximity zones
 const HOTSPOT_ZONES = [
-  { name: "about", x: 36, y: 70, radius: 10 },
-  { name: "skills", x: 16, y: 78, radius: 10 },
-  { name: "projects", x: 74, y: 60, radius: 10 },
-  { name: "contact", x: 80, y: 70, radius: 10 },
-  { name: "education", x: 90, y: 62, radius: 8 },
-  { name: "tv", x: 10, y: 78, radius: 10 },
+  { name: "education", x: 85, y: 67, radius: 10 },
+  { name: "tv", x: 9, y: 75, radius: 10 },
+  { name: "computer", x: 48, y: 68, radius: 10 },
 ];
 
 // Walk animation config per direction

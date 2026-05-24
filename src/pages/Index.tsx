@@ -20,7 +20,7 @@ const Index = () => {
 
       {/* Footer hint */}
       <div className="mt-6 font-pixel text-[10px] text-muted-foreground animate-twinkle">
-        🖥️ Computer • 📚 Bookshelf • 🖼️ Frames • 🛏️ Bed • 🎓 Certificate
+        🖥️ Computer → Desktop • 📚 Bookshelf • 🖼️ Frames • 🛏️ Bed • 🎓 Certificate • 🎮 TV
       </div>
     </div>
   );
