@@ -51,8 +51,9 @@ export const POLY_OBSTACLES: { points: { x: number; y: number }[] }[] = [
   { points: [{x:26.4,y:65.5}, {x:18.3,y:70}, {x:14.1,y:68.9}, {x:14.5,y:43.5}, {x:27,y:37.8}, {x:29.9,y:39.4}, {x:30.2,y:54.5}] }, // shelf
   { points: [{x:16.8,y:74}, {x:8.5,y:78.8}, {x:0.1,y:74}, {x:2.5,y:72.5}, {x:1.7,y:71.4}, {x:6,y:69}, {x:5.5,y:67.4}, {x:5.8,y:64.3}, {x:9.8,y:62.4}, {x:10.9,y:62.9}, {x:13.3,y:63.8}, {x:13.5,y:68.6}, {x:14.5,y:69.5}, {x:14.6,y:72.7}] }, // tv
   { points: [{x:15.3,y:77.2}, {x:17.4,y:76.1}, {x:18.5,y:76.3}, {x:18.9,y:75.2}, {x:20,y:74.2}, {x:21.4,y:73.5}, {x:23.2,y:73.3}, {x:24.6,y:74.1}, {x:25.9,y:76.3}, {x:26.4,y:78.8}, {x:25.9,y:80.7}, {x:24.8,y:82.4}, {x:22.7,y:83.4}, {x:20.7,y:83.5}, {x:18.7,y:83.5}, {x:16.6,y:82.9}, {x:14.9,y:82.1}, {x:13.9,y:80.8}, {x:13.7,y:79.2}] }, // chair
-  { points: [{x:86.4,y:66}, {x:97.2,y:71.7}, {x:97.4,y:59.5}, {x:86.2,y:59}] }, // wall
+  { points: [{x:86.4,y:66}, {x:97.2,y:71.7}, {x:97.4,y:59.5}, {x:86.2,y:59}] }, // wall right
   { points: [{x:53.3,y:60.6}, {x:44.8,y:64.8}, {x:45,y:60.1}] }, // desk corner
+  { points: [{x:51,y:54.8}, {x:48.2,y:53.3}, {x:43.5,y:55.9}, {x:45.5,y:57.6}, {x:42.2,y:55.2}, {x:46.5,y:53.3}, {x:46.5,y:46.9}, {x:44.8,y:45.7}, {x:44.3,y:45.9}, {x:43.3,y:45.1}, {x:39.6,y:47.2}, {x:38.4,y:48.2}, {x:38.4,y:52.6}, {x:42.2,y:55.4}, {x:45.8,y:57.5}] }, // DESKTOP
 ];
 
 // Point-in-polygon test using ray casting algorithm
@@ -70,9 +71,10 @@ function pointInPolygon(px: number, py: number, polygon: { x: number; y: number 
 
 // Hotspot proximity zones
 const HOTSPOT_ZONES = [
-  { name: "education", x: 85, y: 67, radius: 10 },
-  { name: "tv", x: 9, y: 75, radius: 10 },
-  { name: "computer", x: 48, y: 68, radius: 10 },
+  { name: "education", x: 85, y: 67, radius: 10, label: "🎓 Education" },
+  { name: "tv", x: 9, y: 75, radius: 10, label: "🎮 TV" },
+  { name: "computer", x: 48, y: 68, radius: 10, label: "💻 Desktop" },
+  { name: "bed", x: 75, y: 72, radius: 10, label: "🛏️ Sleep" },
 ];
 
 // Walk animation config per direction
@@ -191,9 +193,10 @@ const PixelCharacter = ({ containerRef, onReachHotspot, onNearHotspot, character
     };
   }, [isWalking]);
 
-  // Keyboard input
+  // Keyboard input — skip when frozen so WASD works in Terminal/other apps
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (frozen) return; // Don't capture keys while Desktop Shell is open
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(e.key)) {
         e.preventDefault();
         keysRef.current.add(e.key);
@@ -216,7 +219,7 @@ const PixelCharacter = ({ containerRef, onReachHotspot, onNearHotspot, character
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [nearHotspot, onReachHotspot]);
+  }, [nearHotspot, onReachHotspot, frozen]);
 
   // Game loop
   useEffect(() => {
@@ -360,14 +363,15 @@ const PixelCharacter = ({ containerRef, onReachHotspot, onNearHotspot, character
       {/* Interaction prompt */}
       {nearHotspot && (
         <div
-          className="absolute font-pixel text-[9px] text-warm bg-background/90 px-2 py-1 rounded border border-primary/40 z-30 animate-float"
+          className="absolute font-pixel text-[9px] text-warm bg-background/90 px-3 py-1.5 rounded border border-primary/40 z-30 animate-float flex flex-col items-center gap-0.5"
           style={{
             left: `${pos.x}%`,
             top: `${pos.y - 2}%`,
             transform: "translate(-50%, -100%)",
           }}
         >
-          Press ENTER
+          <span className="text-primary text-[10px]">{HOTSPOT_ZONES.find(z => z.name === nearHotspot)?.label ?? nearHotspot}</span>
+          <span className="text-[8px] opacity-70">Press ENTER</span>
         </div>
       )}
 

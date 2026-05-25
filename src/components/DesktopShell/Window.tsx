@@ -242,7 +242,11 @@ const Window = ({
           onDoubleClick={onMaximize}
         >
           {/* App icon + title */}
-          <span className="text-sm mr-2 pointer-events-none">{state.icon}</span>
+          {state.icon.includes("/") || state.icon.includes("\\") || state.icon.startsWith("data:") ? (
+            <img src={state.icon} alt={state.title} className="w-4 h-4 object-contain mr-2 pointer-events-none" style={{ imageRendering: "pixelated" }} draggable={false} />
+          ) : (
+            <span className="text-sm mr-2 pointer-events-none">{state.icon}</span>
+          )}
           <span
             className="font-pixel text-[9px] flex-1 truncate pointer-events-none"
             style={{

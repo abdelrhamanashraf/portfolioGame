@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { useWindowManager } from "./WindowManager";
 
-const Taskbar = () => {
+interface TaskbarProps {
+  startOpen?: boolean;
+  onStartClick?: () => void;
+}
+
+const Taskbar = ({ startOpen, onStartClick }: TaskbarProps) => {
   const { windows, focusedId, focusApp, minimizeApp } = useWindowManager();
   const [time, setTime] = useState(new Date());
 
@@ -24,11 +29,17 @@ const Taskbar = () => {
     >
       {/* Start / Home button */}
       <button
+        onClick={onStartClick}
         className="h-7 px-3 rounded font-pixel text-[9px] flex items-center gap-1.5 transition-colors"
         style={{
-          background: "linear-gradient(180deg, hsl(25 55% 45%) 0%, hsl(25 55% 35%) 100%)",
-          color: "hsl(35 40% 92%)",
-          border: "1px solid hsl(25 55% 55% / 0.5)",
+          background: startOpen 
+            ? "linear-gradient(180deg, hsl(25 55% 35%) 0%, hsl(25 55% 25%) 100%)"
+            : "linear-gradient(180deg, hsl(25 55% 45%) 0%, hsl(25 55% 35%) 100%)",
+          color: startOpen ? "hsl(35 40% 70%)" : "hsl(35 40% 92%)",
+          border: startOpen 
+            ? "1px solid hsl(25 55% 55% / 0.3)"
+            : "1px solid hsl(25 55% 55% / 0.5)",
+          boxShadow: startOpen ? "inset 0 2px 4px rgba(0,0,0,0.4)" : "none",
         }}
       >
         <span className="text-sm">⌂</span>
@@ -68,7 +79,11 @@ const Taskbar = () => {
               opacity: win.minimized ? 0.6 : 1,
             }}
           >
-            <span className="text-xs">{win.icon}</span>
+            {win.icon.includes("/") || win.icon.includes("\\") || win.icon.startsWith("data:") ? (
+              <img src={win.icon} alt={win.title} className="w-3.5 h-3.5 object-contain" style={{ imageRendering: "pixelated" }} draggable={false} />
+            ) : (
+              <span className="text-xs">{win.icon}</span>
+            )}
             <span className="truncate">{win.title}</span>
           </button>
         ))}

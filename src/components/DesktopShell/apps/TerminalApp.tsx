@@ -61,19 +61,46 @@ const TerminalApp = ({ onExit }: TerminalAppProps) => {
   }, [histIdx, cmdHist]);
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden cursor-text" style={{ background: "#0a0a0a", fontFamily: "'VT323', monospace" }} onClick={focusInput}>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3" style={{ fontSize: "15px", lineHeight: "1.4" }}>
-        {WELCOME.map((l, i) => <div key={`w${i}`} style={{ color: l.color || "#0f0" }}>{l.text || "\u00A0"}</div>)}
+    <div className="w-full h-full flex flex-col overflow-hidden cursor-text relative" style={{
+      background: "#050508",
+      fontFamily: "'VT323', monospace",
+    }} onClick={focusInput}>
+      {/* CRT scanline overlay */}
+      <div className="absolute inset-0 pointer-events-none z-50" style={{
+        background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px)",
+      }} />
+      {/* Screen glow vignette */}
+      <div className="absolute inset-0 pointer-events-none z-40" style={{
+        background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)",
+      }} />
+      {/* Green ambient glow */}
+      <div className="absolute inset-0 pointer-events-none z-30" style={{
+        boxShadow: "inset 0 0 60px rgba(0,255,0,0.03)",
+      }} />
+
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 relative z-10" style={{ fontSize: "15px", lineHeight: "1.5" }}>
+        {WELCOME.map((l, i) => <div key={`w${i}`} style={{ color: l.color || "#0f0", textShadow: `0 0 6px ${l.color || '#0f0'}44` }}>{l.text || "\u00A0"}</div>)}
         {history.map((entry, i) => (
           <div key={i}>
-            <div className="flex"><span style={{ color: "#0f8" }}>{entry.prompt}</span><span style={{ color: "#fff", marginLeft: 8 }}>{entry.command}</span></div>
-            {entry.output.map((l, j) => <div key={j} style={{ color: l.color || "#ccc" }}><pre className="whitespace-pre-wrap m-0 font-retro text-[15px]">{l.text || "\u00A0"}</pre></div>)}
+            <div className="flex">
+              <span style={{ color: "#0f8", textShadow: "0 0 6px #0f844" }}>{entry.prompt}</span>
+              <span style={{ color: "#fff", marginLeft: 8 }}>{entry.command}</span>
+            </div>
+            {entry.output.map((l, j) => (
+              <div key={j} style={{ color: l.color || "#ccc" }}>
+                <pre className="whitespace-pre-wrap m-0 font-retro text-[15px]" style={{ textShadow: l.color ? `0 0 4px ${l.color}44` : "none" }}>
+                  {l.text || "\u00A0"}
+                </pre>
+              </div>
+            ))}
           </div>
         ))}
         <form onSubmit={handleSubmit} className="flex items-center">
-          <span style={{ color: "#0f8" }}>{getPrompt(cwd)}</span>
+          <span style={{ color: "#0f8", textShadow: "0 0 6px #0f844" }}>{getPrompt(cwd)}</span>
           <input ref={inputRef} type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent border-none outline-none ml-2 text-[15px] font-retro" style={{ color: "#fff", caretColor: "#0f0" }} autoFocus spellCheck={false} autoComplete="off" />
+            className="flex-1 bg-transparent border-none outline-none ml-2 text-[15px] font-retro"
+            style={{ color: "#fff", caretColor: "#0f0", textShadow: "0 0 4px rgba(255,255,255,0.1)" }}
+            autoFocus spellCheck={false} autoComplete="off" />
         </form>
       </div>
     </div>

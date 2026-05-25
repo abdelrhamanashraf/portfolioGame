@@ -1,5 +1,9 @@
 import { useState, useRef, useCallback } from "react";
-import roomImage from "@/assets/room.png";
+import roomDefault from "@/assets/room.png";
+import roomSunny from "@/assets/room_sunny.png";
+import roomRainy from "@/assets/room_rainy.png";
+import roomSnowy from "@/assets/room_snowy.png";
+import roomRgb from "@/assets/room_rgb.png";
 import chairImage from "@/assets/beanbagchair .png";
 import tvImage from "@/assets/tv.png";
 import Hotspot from "./Hotspot";
@@ -8,15 +12,28 @@ import TVScreen from "./TVScreen";
 import DesktopShell from "./DesktopShell/DesktopShell";
 import PixelCharacter, { OBSTACLES, BOUNDS, POLY_OBSTACLES } from "./PixelCharacter";
 import CollisionEditor, { type FurnitureItem } from "./CollisionEditor";
+import RoomTheme, { type RoomThemeId, getThemeFilter } from "./RoomTheme";
 
-type Section = "education" | "tv" | "computer" | null;
+type Section = "education" | "tv" | "computer" | "bed" | null;
+
+const ROOM_IMAGES: Record<RoomThemeId, string> = {
+  default: roomDefault,
+  sunny: roomSunny,
+  rainy: roomRainy,
+  snowy: roomSnowy,
+  rgb: roomRgb,
+};
 
 const INITIAL_FURNITURE: FurnitureItem[] = [
   { id: "tv", label: "TV & Console", left: 0, top: 61, width: 17, src: tvImage },
   { id: "chair", label: "Bean Bag Chair", left: 4.4, top: 68.4, width: 30, src: chairImage },
 ];
 
-const GameRoom = () => {
+interface GameRoomProps {
+  theme?: RoomThemeId;
+}
+
+const GameRoom = ({ theme = "default" }: GameRoomProps) => {
   const [activeSection, setActiveSection] = useState<Section>(null);
   const [nearHotspot, setNearHotspot] = useState<string | null>(null);
   const [showEditor, setShowEditor] = useState(false);
@@ -28,6 +45,8 @@ const GameRoom = () => {
   const [walkSpriteSize, setWalkSpriteSize] = useState(8.9);
   const [furniture, setFurniture] = useState<FurnitureItem[]>(INITIAL_FURNITURE);
   const [pendingGameLaunch, setPendingGameLaunch] = useState<string | null>(null);
+  const [isSleeping, setIsSleeping] = useState(false);
+  const [sleepPhase, setSleepPhase] = useState<"off" | "fading" | "dark" | "waking">("off");
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleHotspot = (name: string) => {
@@ -43,6 +62,23 @@ const GameRoom = () => {
       setTimeout(() => {
         setShowDesktop(true);
       }, 700);
+      return;
+    }
+    if (name === "bed") {
+      // Trigger sleep sequence: mount overlay transparent, then darken
+      setIsSleeping(true);
+      setSleepPhase("fading");
+      // Delay the dark phase so the CSS transition actually animates
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setSleepPhase("dark");
+        });
+      });
+      setTimeout(() => setSleepPhase("waking"), 3500);
+      setTimeout(() => {
+        setSleepPhase("off");
+        setIsSleeping(false);
+      }, 5200);
       return;
     }
     setActiveSection(name as Section);
@@ -71,7 +107,7 @@ const GameRoom = () => {
     }, 300);
   }, []);
 
-  const isFrozen = isZooming || showTV || isDesktopZooming || showDesktop;
+  const isFrozen = isZooming || showTV || isDesktopZooming || showDesktop || isSleeping;
 
   return (
     <div className="relative w-full max-w-4xl mx-auto select-none">
@@ -85,7 +121,7 @@ const GameRoom = () => {
         }}
       >
         <img
-          src={roomImage}
+          src={ROOM_IMAGES[theme]}
           alt="Cozy pixel art room"
           className="w-full h-auto rounded-lg"
           draggable={false}
@@ -97,17 +133,21 @@ const GameRoom = () => {
             key={item.id}
             src={item.src}
             alt={item.label}
-            className="absolute pointer-events-none"
+            className="absolute pointer-events-none transition-[filter] duration-500"
             style={{
               left: `${item.left}%`,
               top: `${item.top}%`,
               width: `${item.width}%`,
               imageRendering: "pixelated" as const,
               zIndex: 10,
+              filter: getThemeFilter(theme),
             }}
             draggable={false}
           />
         ))}
+
+        {/* Room theme overlay (weather/lighting) */}
+        <RoomTheme theme={theme} />
 
         {/* Hotspots - positioned relative to the image */}
 
@@ -130,9 +170,17 @@ const GameRoom = () => {
         {/* Computer Desk — polygon hotspot */}
         <Hotspot
           label="Desktop"
-          polygonPoints="38.3,52.9 44.5,59.2 52.5,55.4 55,54.7 55,61.5 60.1,59.6 60.2,52.6 52.7,47.9 47.4,50.7"
+          polygonPoints="51,54.8 48.2,53.3 43.5,55.9 45.5,57.6 42.2,55.2 46.5,53.3 46.5,46.9 44.8,45.7 44.3,45.9 43.3,45.1 39.6,47.2 38.4,48.2 38.4,52.6 42.2,55.4 45.8,57.5"
           isGlowing={nearHotspot === "computer"}
           onClick={() => handleHotspot("computer")}
+        />
+
+        {/* Bed — polygon hotspot */}
+        <Hotspot
+          label="Sleep"
+          polygonPoints="78.6,69.9 63.8,61.1 64.2,51.9 73.6,47.9 86.4,54.9 86.4,66.1"
+          isGlowing={nearHotspot === "bed"}
+          onClick={() => handleHotspot("bed")}
         />
 
         {/* Player Character */}
@@ -150,6 +198,28 @@ const GameRoom = () => {
 
       {/* Desktop Shell overlay */}
       <DesktopShell open={showDesktop} onClose={handleCloseDesktop} onLaunchGame={handleLaunchGame} />
+
+      {/* Sleep / Blackout overlay */}
+      {sleepPhase !== "off" && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none"
+          style={{
+            backgroundColor:
+              sleepPhase === "dark" ? "rgba(0,0,0,0.95)" : "rgba(0,0,0,0)",
+            transition: "background-color 1.5s ease-in-out",
+          }}
+        >
+          {sleepPhase === "dark" && (
+            <div
+              className="flex flex-col items-center gap-3 animate-float"
+              style={{ animation: "fadeIn 0.8s ease-out, float 3s ease-in-out infinite" }}
+            >
+              <span className="font-pixel text-4xl text-primary/80" style={{ textShadow: "0 0 20px hsl(25 55% 45% / 0.6)" }}>💤</span>
+              <span className="font-pixel text-lg text-warm/60" style={{ letterSpacing: "0.3em" }}>Z z z . . .</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Editor toggle — dev only */}
       {import.meta.env.DEV && (
