@@ -17,6 +17,7 @@ import vscodeIcon from "@/assets/vscode.png";
 import terminalIcon from "@/assets/terminal.png";
 import firefoxIcon from "@/assets/firefox.png";
 import thispcIcon from "@/assets/thispc.png";
+import kaliWallpaper from "@/assets/kali_wallpaper.png";
 
 interface DesktopShellProps {
   open: boolean;
@@ -163,7 +164,7 @@ function StartMenu({ open, onClose, onLaunchApp }: {
             <div className="w-6 h-6 rounded-full flex items-center justify-center text-sm" style={{ background: "hsl(25 55% 40%)" }}>
               👤
             </div>
-            <span className="font-pixel text-[8px]" style={{ color: "hsl(35 30% 80%)" }}>Developer</span>
+            <span className="font-pixel text-[8px]" style={{ color: "hsl(35 30% 80%)" }}>Abdelrahman</span>
           </div>
           <button
             onClick={onClose}
@@ -418,39 +419,23 @@ const DesktopShell = ({ open, onClose, onLaunchGame }: DesktopShellProps) => {
       >
         {/* Desktop wallpaper */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            background: `
-              radial-gradient(ellipse at 30% 20%, hsl(220 50% 15%) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, hsl(25 40% 12%) 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 50%, hsl(240 30% 8%) 0%, hsl(220 40% 5%) 100%)
-            `,
+            backgroundImage: `url(${kaliWallpaper})`,
           }}
         >
+          {/* Subtle dark glassmorphic overlay for desktop readability */}
+          <div className="absolute inset-0 bg-black/35" />
+
           {/* Subtle grid pattern */}
           <div
-            className="absolute inset-0 opacity-[0.03]"
+            className="absolute inset-0 opacity-[0.04]"
             style={{
               backgroundImage:
                 "linear-gradient(hsl(220 50% 50%) 1px, transparent 1px), linear-gradient(90deg, hsl(220 50% 50%) 1px, transparent 1px)",
               backgroundSize: "40px 40px",
             }}
           />
-          {/* Animated dots (stars) */}
-          {Array.from({ length: 30 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full animate-twinkle"
-              style={{
-                left: `${(i * 31.7 + 13) % 100}%`,
-                top: `${(i * 23.3 + 7) % 95}%`,
-                width: i % 3 === 0 ? 2 : 1,
-                height: i % 3 === 0 ? 2 : 1,
-                background: `hsl(${(i * 60) % 360} 50% 60% / 0.4)`,
-                animationDelay: `${(i * 0.3) % 2}s`,
-              }}
-            />
-          ))}
         </div>
 
         {/* Scanline overlay */}

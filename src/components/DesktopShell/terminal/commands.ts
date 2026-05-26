@@ -1,205 +1,15 @@
-// ─── Virtual Filesystem ──────────────────────────────────────
-interface FSNode {
-  type: "file" | "dir";
-  content?: string;
-  children?: Record<string, FSNode>;
-}
+import { resolvePath, getNode, type FSNode } from "./filesystem";
 
-const FILESYSTEM: Record<string, FSNode> = {
-  "~": {
-    type: "dir",
-    children: {
-      "about.txt": {
-        type: "file",
-        content: `╔══════════════════════════════════════╗
-║          ABOUT ME                    ║
-╚══════════════════════════════════════╝
-
-Hey! I'm a passionate Full-Stack Developer who loves
-building interactive web experiences and pixel art.
-
-I specialize in React, TypeScript, and Node.js, with
-a strong focus on creating engaging user interfaces
-that push the boundaries of what's possible on the web.
-
-When I'm not coding, you'll find me playing retro
-games, designing pixel art, or contributing to
-open-source projects.
-
-Location: Earth 🌍
-Role: Full-Stack Developer
-Status: Open to opportunities ✨`,
-      },
-      "skills.txt": {
-        type: "file",
-        content: `╔══════════════════════════════════════╗
-║          SKILLS                      ║
-╚══════════════════════════════════════╝
-
-Frontend
-  React / Next.js    ████████████████████ 90%
-  TypeScript         ██████████████████░░ 85%
-  CSS / Tailwind     ████████████████░░░░ 80%
-  HTML5 / Canvas     ████████████████████ 90%
-
-Backend
-  Node.js / Express  ███████████████░░░░░ 75%
-  Python / FastAPI   ██████████████░░░░░░ 70%
-  PostgreSQL / SQL   ███████████████░░░░░ 75%
-  REST / GraphQL     ██████████████████░░ 85%
-
-DevOps & Tools
-  Git / GitHub       ████████████████████ 90%
-  Docker             ████████████░░░░░░░░ 60%
-  AWS / EC2 / S3     ████████████░░░░░░░░ 60%
-  CI/CD              ██████████░░░░░░░░░░ 55%`,
-      },
-      "contact.txt": {
-        type: "file",
-        content: `╔══════════════════════════════════════╗
-║          CONTACT                     ║
-╚══════════════════════════════════════╝
-
-📧 Email    → hello@developer.dev
-🐙 GitHub   → github.com/developer
-🐦 Twitter  → @developer
-💼 LinkedIn → linkedin.com/in/developer
-🌐 Website  → developer.dev
-
-Feel free to reach out! I'm always happy to
-chat about new projects and opportunities.`,
-      },
-      "education.txt": {
-        type: "file",
-        content: `╔══════════════════════════════════════╗
-║          EDUCATION                   ║
-╚══════════════════════════════════════╝
-
-🎓 Bachelor of Science in Computer Science
-   University Name
-   2020 — 2024
-   GPA: 3.8 / 4.0
-   Specialization: Software Engineering
-
-🏅 Certifications:
-   ✦ AWS Cloud Practitioner (2024)
-   ✦ React Developer Certificate — Meta (2023)
-   ✦ Full Stack Web Dev — freeCodeCamp (2022)`,
-      },
-      projects: {
-        type: "dir",
-        children: {
-          "pixel-quest.md": {
-            type: "file",
-            content: `# Pixel Quest 🎮
-
-A 2D adventure game built with vanilla JavaScript
-and HTML5 Canvas.
-
-Tech: JavaScript, Canvas API, Web Audio
-Status: Complete
-Link: github.com/developer/pixel-quest
-
-Features:
-  • Procedurally generated dungeons
-  • Pixel-art character animations
-  • Retro soundtrack & SFX
-  • Inventory & crafting system`,
-          },
-          "retro-chat.md": {
-            type: "file",
-            content: `# RetroChat 💬
-
-A real-time chat application with a retro terminal
-aesthetic and WebSocket-powered messaging.
-
-Tech: React, Node.js, WebSocket, MongoDB
-Status: Complete
-Link: github.com/developer/retro-chat
-
-Features:
-  • Real-time messaging with typing indicators
-  • Custom emoji support
-  • Channel system with permissions
-  • Message search & history`,
-          },
-          "code-forge.md": {
-            type: "file",
-            content: `# CodeForge ⚡
-
-An online code editor with live preview,
-syntax highlighting, and collaboration features.
-
-Tech: TypeScript, Monaco Editor, WebSocket
-Status: In Progress
-Link: github.com/developer/code-forge
-
-Features:
-  • Multi-language support (JS, TS, Python)
-  • Real-time collaborative editing
-  • Integrated terminal
-  • Git integration`,
-          },
-        },
-      },
-      ".secret": {
-        type: "file",
-        content: `🎉 You found the secret file!
-
-Easter egg: Try the Konami code in the room...
-↑ ↑ ↓ ↓ ← → ← → B A
-
-Thanks for exploring! You're clearly someone
-who likes digging into systems. I appreciate
-that kind of curiosity. 🚀`,
-      },
-    },
-  },
-};
-
-// ─── Path Resolution ─────────────────────────────────────────
-function resolvePath(cwd: string, input: string): string {
-  if (input === "~" || input === "") return "~";
-  if (input.startsWith("~/")) input = input;
-  else if (input === "..") {
-    const parts = cwd.split("/").filter(Boolean);
-    parts.pop();
-    return parts.length === 0 ? "~" : parts.join("/");
-  } else if (input.startsWith("/")) return input;
-  else input = cwd === "~" ? `~/${input}` : `${cwd}/${input}`;
-
-  // Normalize path
-  const parts = input.split("/").filter((p) => p !== ".");
-  const result: string[] = [];
-  for (const part of parts) {
-    if (part === "..") result.pop();
-    else result.push(part);
-  }
-  return result.join("/") || "~";
-}
-
-function getNode(path: string): FSNode | null {
-  const parts = path.split("/").filter(Boolean);
-  let node: FSNode = FILESYSTEM["~"];
-  if (parts[0] === "~") parts.shift();
-
-  for (const part of parts) {
-    if (node.type !== "dir" || !node.children?.[part]) return null;
-    node = node.children[part];
-  }
-  return node;
-}
-
-// ─── Command Output ──────────────────────────────────────────
 export interface CommandOutput {
   text: string;
   color?: string;
+  isApp?: string;
+  appProps?: any;
 }
 
-// ─── Neofetch ASCII ──────────────────────────────────────────
-const NEOFETCH = `\x1b[cyan]       ████████████       \x1b[reset]  guest@portfolio
+const NEOFETCH = `\x1b[cyan]       ████████████       \x1b[reset]  kuro@portfolio
 \x1b[cyan]     ██            ██     \x1b[reset]  ─────────────────
-\x1b[cyan]   ██    ██    ██    ██   \x1b[reset]  OS: PortfolioOS 1.0
+\x1b[cyan]   ██    ██    ██    ██   \x1b[reset]  OS: PortfolioOS 1.0 (Pixel)
 \x1b[cyan]  ██    ████  ████    ██  \x1b[reset]  Host: Browser VM
 \x1b[cyan]  ██                  ██  \x1b[reset]  Kernel: React 18.3
 \x1b[cyan]  ██   ██        ██   ██  \x1b[reset]  Shell: psh 1.0
@@ -207,10 +17,9 @@ const NEOFETCH = `\x1b[cyan]       ████████████       \x
 \x1b[cyan]     ██            ██     \x1b[reset]  WM: WindowManager
 \x1b[cyan]       ████████████       \x1b[reset]  Theme: Retro Warm
 \x1b[cyan]                          \x1b[reset]  Terminal: xterm-pixel
-\x1b[cyan]  ██  ██  ██  ██  ██  ██ \x1b[reset]  CPU: TypeScript 5.8
-                              Memory: ∞`;
+\x1b[cyan]  ██  ██  ██  ██  ██  ██ \x1b[reset]  CPU: TypeScript 5.8 vCPU
+                              Memory: 4096MiB / 16384MiB`;
 
-// ─── Command Registry ────────────────────────────────────────
 type CommandHandler = (
   args: string[],
   cwd: string,
@@ -233,6 +42,10 @@ const COMMANDS: Record<string, CommandHandler> = {
     { text: "  cd <dir>     Change directory", color: "#aaa" },
     { text: "  cat <file>   Read file contents", color: "#aaa" },
     { text: "  pwd          Print working directory", color: "#aaa" },
+    { text: "  df           Report file system disk space usage", color: "#aaa" },
+    { text: "  nano <file>  Edit a file in nano (simulated)", color: "#aaa" },
+    { text: "  vi <file>    Edit a file in vi (simulated)", color: "#aaa" },
+    { text: "  sudo <cmd>   Execute a command as superuser", color: "#aaa" },
     { text: "  echo <text>  Print text", color: "#aaa" },
     { text: "  date         Show current date", color: "#aaa" },
     { text: "  clear        Clear terminal", color: "#aaa" },
@@ -243,9 +56,7 @@ const COMMANDS: Record<string, CommandHandler> = {
   ],
 
   whoami: () => [
-    { text: "guest", color: "#0f8" },
-    { text: "Role: Visitor", color: "#aaa" },
-    { text: "Access: read-only", color: "#aaa" },
+    { text: "kuro", color: "#0f8" },
   ],
 
   about: () => {
@@ -268,9 +79,13 @@ const COMMANDS: Record<string, CommandHandler> = {
       { text: "" },
     ];
     Object.entries(dir.children).forEach(([name, node]) => {
-      if (node.type === "file") {
-        const title = node.content?.split("\n").find((l) => l.startsWith("#"))?.replace("# ", "") || name;
+      if (node.type === "dir" && node.children && node.children["README.md"]) {
+        const title = node.children["README.md"].content?.split("\n").find((l) => l.startsWith("#"))?.replace("# ", "") || name;
         lines.push({ text: `  📁 ${title}`, color: "#0f8" });
+        lines.push({ text: `     cat projects/${name}/README.md`, color: "#666" });
+      } else if (node.type === "file") {
+        const title = node.content?.split("\n").find((l) => l.startsWith("#"))?.replace("# ", "") || name;
+        lines.push({ text: `  📄 ${title}`, color: "#0f8" });
         lines.push({ text: `     cat projects/${name}`, color: "#666" });
       }
     });
@@ -296,20 +111,50 @@ const COMMANDS: Record<string, CommandHandler> = {
       let color = "#0f8";
       if (text.includes("\x1b[cyan]")) {
         color = "#0ff";
-        text = text.replace(/\x1b\[cyan\]/g, "").replace(/\x1b\[reset\]/g, "");
+        text = text.replace(/\x1b\\[cyan\\]/g, "").replace(/\x1b\\[reset\\]/g, "");
       }
       return { text, color };
     });
   },
 
   ls: (args, cwd) => {
-    const target = args[0] ? resolvePath(cwd, args[0]) : cwd;
+    const isAll = args.includes("-a") || args.includes("-la") || args.includes("-al");
+    const isLong = args.includes("-l") || args.includes("-la") || args.includes("-al");
+    const targetArg = args.find(a => !a.startsWith("-"));
+    
+    const target = targetArg ? resolvePath(cwd, targetArg) : cwd;
     const node = getNode(target);
-    if (!node) return [{ text: `ls: cannot access '${args[0] || target}': No such file or directory`, color: "#f44" }];
-    if (node.type !== "dir") return [{ text: args[0] || target, color: "#fff" }];
+    if (!node) return [{ text: `ls: cannot access '${targetArg || target}': No such file or directory`, color: "#f44" }];
+    
+    if (node.type !== "dir") {
+      if (isLong) {
+        return [{ text: `${node.permissions || '-rw-r--r--'} 1 ${node.owner || 'kuro'} ${node.owner || 'kuro'} ${node.size || 0} ${targetArg || target}`, color: "#fff" }];
+      }
+      return [{ text: targetArg || target, color: "#fff" }];
+    }
 
-    const entries = Object.entries(node.children || {});
+    let entries = Object.entries(node.children || {});
+    if (!isAll) {
+      entries = entries.filter(([name]) => !name.startsWith("."));
+    }
+    
     if (entries.length === 0) return [{ text: "(empty directory)", color: "#666" }];
+
+    if (isLong) {
+      const output: CommandOutput[] = [{ text: `total ${entries.length * 4}`, color: "#ccc" }];
+      if (isAll) {
+        output.push({ text: `drwxr-xr-x 1 ${node.owner || 'kuro'} ${node.owner || 'kuro'} 4096 .`, color: "#55f" });
+        output.push({ text: `drwxr-xr-x 1 ${node.owner || 'kuro'} ${node.owner || 'kuro'} 4096 ..`, color: "#55f" });
+      }
+      entries.forEach(([name, child]) => {
+        const perms = child.permissions || (child.type === "dir" ? "drwxr-xr-x" : "-rw-r--r--");
+        const owner = child.owner || "kuro";
+        const size = child.size || (child.type === "dir" ? 4096 : 0);
+        const color = child.type === "dir" ? "#55f" : name.startsWith(".") ? "#666" : "#fff";
+        output.push({ text: `${perms} 1 ${owner} ${owner} ${String(size).padStart(6, ' ')} ${name}`, color });
+      });
+      return output;
+    }
 
     return entries.map(([name, child]) => ({
       text: child.type === "dir" ? `📁 ${name}/` : `📄 ${name}`,
@@ -336,11 +181,72 @@ const COMMANDS: Record<string, CommandHandler> = {
 
     if (!node) return [{ text: `cat: ${args[0]}: No such file or directory`, color: "#f44" }];
     if (node.type === "dir") return [{ text: `cat: ${args[0]}: Is a directory`, color: "#f44" }];
+    if (node.permissions && !node.permissions.includes("r") && node.owner === "root") {
+      return [{ text: `cat: ${args[0]}: Permission denied`, color: "#f44" }];
+    }
 
     return (node.content || "").split("\n").map((line) => ({ text: line }));
   },
 
-  pwd: (_args, cwd) => [{ text: cwd.replace("~", "/home/guest"), color: "#0f8" }],
+  pwd: (_args, cwd) => [{ text: cwd, color: "#0f8" }],
+
+  df: () => [
+    { text: "Filesystem      1K-blocks      Used Available Use% Mounted on", color: "#ccc" },
+    { text: "udev              8192000         0   8192000   0% /dev", color: "#fff" },
+    { text: "tmpfs             1638400      1024   1637376   1% /run", color: "#fff" },
+    { text: "/dev/sda1       102400000  48300000  54100000  48% /", color: "#fff" },
+    { text: "/dev/sda2        51200000    102400  51097600   1% /home", color: "#fff" },
+    { text: "tmpfs             8192000         0   8192000   0% /dev/shm", color: "#fff" },
+    { text: "tmpfs                5120         4      5116   1% /run/lock", color: "#fff" },
+  ],
+
+  nano: (args, cwd) => {
+    if (!args[0]) return [{ text: "nano: missing file operand", color: "#f44" }];
+    const path = resolvePath(cwd, args[0]);
+    const node = getNode(path);
+    
+    if (node && node.type === "dir") return [{ text: `nano: ${args[0]} is a directory`, color: "#f44" }];
+    
+    return [
+      { 
+        text: "__NANO__", 
+        isApp: "nano", 
+        appProps: { 
+          filename: args[0], 
+          initialContent: node?.content || "" 
+        } 
+      }
+    ];
+  },
+
+  vi: (args, cwd) => {
+    if (!args[0]) return [{ text: "vi: missing file operand", color: "#f44" }];
+    const path = resolvePath(cwd, args[0]);
+    const node = getNode(path);
+    
+    if (node && node.type === "dir") return [{ text: `vi: ${args[0]} is a directory`, color: "#f44" }];
+    
+    return [
+      { 
+        text: "__VIM__", 
+        isApp: "vim", 
+        appProps: { 
+          filename: args[0], 
+          initialContent: node?.content || "" 
+        } 
+      }
+    ];
+  },
+
+  vim: (args, cwd, setCwd) => COMMANDS.vi(args, cwd, setCwd),
+
+  sudo: (args, cwd, setCwd) => {
+    if (args.length === 0) return [{ text: "usage: sudo <command>", color: "#f44" }];
+    return [
+      { text: "[sudo] password for kuro: ", color: "#fff" },
+      { text: "kuro is not in the sudoers file. This incident will be reported.", color: "#f44" }
+    ];
+  },
 
   echo: (args) => [{ text: args.join(" ") }],
 
@@ -363,8 +269,16 @@ export function executeCommand(
   if (!trimmed) return [];
 
   const parts = trimmed.split(/\s+/);
-  const cmd = parts[0].toLowerCase();
-  const args = parts.slice(1);
+  let cmd = parts[0].toLowerCase();
+  let args = parts.slice(1);
+
+  // aliases
+  if (cmd === "ll") {
+    cmd = "ls";
+    args = ["-la", ...args];
+  } else if (cmd === "cls") {
+    cmd = "clear";
+  }
 
   const handler = COMMANDS[cmd];
   if (!handler) {
@@ -378,6 +292,8 @@ export function executeCommand(
 }
 
 export function getPrompt(cwd: string): string {
-  const path = cwd === "~" ? "~" : cwd.replace("~", "~");
-  return `guest@portfolio:${path}$`;
+  const path = cwd.startsWith("/home/kuro") 
+    ? cwd.replace("/home/kuro", "~") 
+    : cwd;
+  return `kuro@portfolio:${path}$`;
 }

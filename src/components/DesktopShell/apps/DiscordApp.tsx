@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import discordBanner from "@/assets/discord_banner.png";
+import discordAvatar from "@/assets/discord_avatar.png";
 
 const SERVER_ICONS = [
-  { id: "main", emoji: "🎮", color: "#5865f2", active: true },
-  { id: "s2", emoji: "🎨", color: "#3ba55c" },
-  { id: "s3", emoji: "🐱", color: "#ed4245" },
+  { id: "main", emoji: "🐱", color: "#5865f2", active: true },
+  { id: "s2", emoji: "🎮", color: "#3ba55c" },
+  { id: "s3", emoji: "🎨", color: "#ed4245" },
   { id: "s4", emoji: "🎵", color: "#faa61a" },
   { id: "s5", emoji: "⚡", color: "#57f287" },
+  { id: "s6", emoji: "💻", color: "#9b59b6" },
+  { id: "s7", emoji: "🌸", color: "#e91e63" },
 ];
 
 const CHANNELS = [
@@ -36,23 +39,23 @@ interface Message {
 
 const MESSAGES: Record<string, Message[]> = {
   general: [
-    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "Welcome to my portfolio server! 👋", time: "Today at 10:00 AM", isBot: true },
+    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "Welcome to Abdelrahman's portfolio server! 👋", time: "Today at 10:00 AM", isBot: true },
     { id: 2, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "Feel free to check out the channels:", time: "Today at 10:00 AM", isBot: true },
-    { id: 3, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "📌 #about-me — Learn about who I am\n📌 #projects — See my work\n📌 #contact — Ways to reach me", time: "Today at 10:01 AM", isBot: true },
-    { id: 4, author: "Visitor", avatar: "👤", avatarColor: "#747f8d", content: "Hey! Cool portfolio!", time: "Today at 10:05 AM" },
+    { id: 3, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "📌 #about-me — Learn about Abdelrahman\n📌 #projects — See my work\n📌 #contact — Ways to reach me", time: "Today at 10:01 AM", isBot: true },
+    { id: 4, author: "Visitor", avatar: "👤", avatarColor: "#747f8d", content: "Hey! Love the pixel art portfolio!", time: "Today at 10:05 AM" },
     { id: 5, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "Thanks! Try the Terminal app on the desktop too! 🖥️", time: "Today at 10:05 AM", isBot: true },
   ],
   "about-me": [
-    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "👨‍💻 **About Me**\n\nI'm a Full-Stack Developer passionate about creating interactive web experiences and pixel art.\n\n🛠️ **Tech Stack:**\n• React / Next.js\n• TypeScript\n• Node.js / Express\n• PostgreSQL / AWS / Docker", time: "Today at 9:00 AM", isBot: true },
+    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "👨‍💻 **About Abdelrahman Ashraf**\n\nFull-Stack Developer & Oracle Database/WebLogic Administrator based in Cairo, Egypt.\n\n🛠️ **Tech Stack:**\n• JavaScript / TypeScript / React / Node.js\n• Oracle DB (11g/12c/19c) / PostgreSQL / MongoDB\n• Oracle WebLogic 12c / Docker / AWS / Azure\n• Python / FastAPI / Django / Angular\n• C / PHP / Bash / Linux Administration", time: "Today at 9:00 AM", isBot: true },
   ],
   projects: [
-    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "🚀 **My Projects**\n\n**Pixel Quest** — 2D adventure game\nJS, Canvas, Web Audio\n\n**RetroChat** — Real-time chat\nReact, Node.js, WebSocket\n\n**CodeForge** — Online code editor\nTypeScript, Monaco", time: "Today at 9:00 AM", isBot: true },
+    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "🚀 **My Projects**\n\n**WebLogic Microservice** — Enterprise microservice\nOracle WebLogic 12c, Oracle DB 19c, JDBC\n\n**Netflix Replica** — Full-stack streaming UI\nReact, Node.js, Express\n\n**Discord Bot** — Utility bot with AI\nJavaScript, Discord.js, API integrations\n\n**Udagram** — Cloud-hosted app (Udacity)\nTypeScript, AWS, Node.js", time: "Today at 9:00 AM", isBot: true },
   ],
   contact: [
-    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "📬 **Contact Information**\n\n📧 Email: hello@developer.dev\n🐙 GitHub: github.com/developer\n🐦 Twitter: @developer\n💼 LinkedIn: linkedin.com/in/developer", time: "Today at 9:00 AM", isBot: true },
+    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "📬 **Contact Information**\n\n📧 Email: contact@abdelrahmanashraf.tech\n📱 Phone: +20 127 052 2508\n🐙 GitHub: github.com/abdelrhamanashraf\n💼 LinkedIn: linkedin.com/in/abdelrahman-ashraf-a10070222\n🌐 Portfolio: abdelrhamanashraf.github.io", time: "Today at 9:00 AM", isBot: true },
   ],
   welcome: [
-    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "Welcome to the Portfolio Server! 🎉\n\nThis is a pixel-art portfolio disguised as a Discord server.\nFeel free to explore!", time: "Today at 8:00 AM", isBot: true },
+    { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "Welcome to Abdelrahman's Portfolio Server! 🎉\n\nThis is a pixel-art portfolio disguised as a Discord server.\nFeel free to explore!", time: "Today at 8:00 AM", isBot: true },
   ],
   rules: [
     { id: 1, author: "PortfolioBot", avatar: "🤖", avatarColor: "#5865f2", content: "📜 **Server Rules**\n\n1. Be respectful\n2. Have fun exploring\n3. Check out all the apps on the desktop!\n4. Play the retro games on the TV 🎮", time: "Today at 8:00 AM", isBot: true },
@@ -61,11 +64,17 @@ const MESSAGES: Record<string, Message[]> = {
 
 const MEMBERS = [
   { name: "PortfolioBot", status: "online", role: "Bot", color: "#5865f2", avatar: "🤖", isBot: true },
-  { name: "Developer", status: "online", role: "Admin", color: "#e91e63", avatar: "👨‍💻" },
+  { name: "Diana", status: "online", role: "Bot", color: "#e67e22", avatar: "🦊", isBot: true },
+  { name: "MeowBoteow", status: "online", role: "Bot", color: "#9b59b6", avatar: "🐱", isBot: true },
+  { name: "Musico", status: "online", role: "Bot", color: "#2ecc71", avatar: "🎵", isBot: true },
+  { name: "くろセンセイ", status: "online", role: "Admin", color: "#e91e63", avatar: "pfp", avatarImg: true },
   { name: "Visitor", status: "online", role: "Member", color: "#3ba55c", avatar: "👤" },
-  { name: "Garfield", status: "idle", role: "Member", color: "#faa61a", avatar: "🐱" },
-  { name: "PixelFan", status: "dnd", role: "Member", color: "#ed4245", avatar: "🎨" },
-  { name: "RetroGamer", status: "offline", role: "Member", color: "#747f8d", avatar: "🕹️" },
+  { name: "!KuroSama!", status: "offline", role: "Member", color: "#e91e63", avatar: "🐱" },
+  { name: "!'KuroSen...", status: "offline", role: "Member", color: "#9b59b6", avatar: "😺" },
+  { name: "ألبورد!", status: "offline", role: "Member", color: "#e74c3c", avatar: "🎭" },
+  { name: "3ayz adag3", status: "offline", role: "Member", color: "#747f8d", avatar: "😎" },
+  { name: "abdoashraf", status: "offline", role: "Member", color: "#747f8d", avatar: "👤" },
+  { name: "قطة محتاجة 4", status: "offline", role: "Member", color: "#747f8d", avatar: "🐈" },
 ];
 
 const STATUS_COLORS: Record<string, string> = { online: "#3ba55c", idle: "#faa61a", dnd: "#ed4245", offline: "#747f8d" };
@@ -87,7 +96,7 @@ const DiscordApp = () => {
     e.preventDefault();
     if (!inputText.trim()) return;
     const msg: Message = {
-      id: Date.now(), author: "You", avatar: "🧑", avatarColor: "#3ba55c",
+      id: Date.now(), author: "くろセンセイ", avatar: "pfp", avatarColor: "#e91e63",
       content: inputText.trim(),
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
@@ -127,7 +136,7 @@ const DiscordApp = () => {
         <div className="relative" style={{ height: "80px" }}>
           <img src={discordBanner} alt="Server banner" className="w-full h-full object-cover" style={{ imageRendering: "pixelated" }} draggable={false} />
           <div className="absolute bottom-1 left-2 flex items-center gap-1">
-            <span style={{ color: "#fff", fontSize: "13px", fontWeight: "bold", textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>Portfolio ▾</span>
+            <span style={{ color: "#fff", fontSize: "13px", fontWeight: "bold", textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>Meow Server ▾</span>
           </div>
         </div>
 
@@ -174,13 +183,13 @@ const DiscordApp = () => {
 
         {/* User panel */}
         <div className="px-1.5 py-1.5 flex items-center gap-2" style={{ background: "#232428" }}>
-          <div className="w-8 h-8 flex items-center justify-center rounded-full text-base relative" style={{ background: "#5865f2" }}>
-            🧑
+          <div className="w-8 h-8 rounded-full relative overflow-hidden flex-shrink-0">
+            <img src={discordAvatar} alt="avatar" className="w-full h-full object-cover" />
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full" style={{ background: "#3ba55c", border: "2px solid #232428" }} />
           </div>
           <div className="flex-1 min-w-0">
-            <div style={{ fontSize: "12px", color: "#fff" }} className="truncate">Visitor</div>
-            <div style={{ fontSize: "10px", color: "#949ba4" }}>Online</div>
+            <div style={{ fontSize: "12px", color: "#fff" }} className="truncate">くろセンセイ</div>
+            <div style={{ fontSize: "10px", color: "#949ba4" }}>kur0senpai</div>
           </div>
           <div className="flex gap-1" style={{ color: "#b5bac1" }}>
             <span className="cursor-pointer text-sm hover:text-white">🎙️</span>
@@ -208,9 +217,15 @@ const DiscordApp = () => {
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
           {msgs.map(msg => (
             <div key={msg.id} className="flex gap-3 py-0.5 px-1 rounded hover:bg-[#2e3035] transition-colors">
-              <div className="w-9 h-9 flex items-center justify-center text-lg flex-shrink-0 rounded-full mt-0.5" style={{ background: msg.avatarColor }}>
-                {msg.avatar}
-              </div>
+              {msg.avatar === "pfp" ? (
+                <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 mt-0.5">
+                  <img src={discordAvatar} alt="avatar" className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-9 h-9 flex items-center justify-center text-lg flex-shrink-0 rounded-full mt-0.5" style={{ background: msg.avatarColor }}>
+                  {msg.avatar}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span style={{ color: msg.isBot ? "#5865f2" : "#f2f3f5", fontWeight: "bold", fontSize: "13px" }}>
@@ -242,7 +257,7 @@ const DiscordApp = () => {
               type="text"
               value={inputText}
               onChange={e => setInputText(e.target.value)}
-              placeholder={`Message #${channelName}`}
+              placeholder={`Message #${channelName}  — くろセンセイ`}
               className="flex-1 bg-transparent border-none outline-none py-2"
               style={{ color: "#dbdee1", fontSize: "13px", fontFamily: "'VT323', monospace" }}
               spellCheck={false}
@@ -264,16 +279,23 @@ const DiscordApp = () => {
         </div>
         {MEMBERS.filter(m => m.status !== "offline").map(m => (
           <div key={m.name} className="flex items-center gap-2 px-1 py-1 rounded cursor-pointer hover:bg-[#35363c] transition-colors">
-            <div className="w-7 h-7 flex items-center justify-center rounded-full text-sm relative" style={{ background: m.color + "33" }}>
-              {m.avatar}
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full" style={{ background: STATUS_COLORS[m.status], border: "2px solid #2b2d31" }} />
-            </div>
+            {(m as any).avatarImg ? (
+              <div className="w-7 h-7 rounded-full relative overflow-hidden flex-shrink-0">
+                <img src={discordAvatar} alt="avatar" className="w-full h-full object-cover" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full" style={{ background: STATUS_COLORS[m.status], border: "2px solid #2b2d31" }} />
+              </div>
+            ) : (
+              <div className="w-7 h-7 flex items-center justify-center rounded-full text-sm relative" style={{ background: m.color + "33" }}>
+                {m.avatar}
+                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full" style={{ background: STATUS_COLORS[m.status], border: "2px solid #2b2d31" }} />
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-1">
                 <span style={{ color: m.color, fontSize: "12px" }}>{m.name}</span>
-                {m.isBot && <span style={{ background: "#5865f2", color: "#fff", fontSize: "7px", padding: "0 2px" }}>BOT</span>}
+                {m.isBot && <span className="rounded-sm" style={{ background: "#5865f2", color: "#fff", fontSize: "7px", padding: "0 3px" }}>APP</span>}
               </div>
-              <div style={{ fontSize: "10px", color: "#949ba4" }}>{m.role}</div>
+              {(m as any).avatarImg && <div style={{ fontSize: "9px", color: "#949ba4" }}>🐱 Meow</div>}
             </div>
           </div>
         ))}
@@ -286,7 +308,10 @@ const DiscordApp = () => {
             <div className="w-7 h-7 flex items-center justify-center rounded-full text-sm" style={{ background: "#747f8d33" }}>
               {m.avatar}
             </div>
-            <span style={{ color: "#949ba4", fontSize: "12px" }}>{m.name}</span>
+            <div>
+              <span style={{ color: "#949ba4", fontSize: "12px" }}>{m.name}</span>
+              {m.name === "!'KuroSen..." && <div style={{ fontSize: "9px", color: "#747f8d" }}>🐱 Meow</div>}
+            </div>
           </div>
         ))}
       </div>

@@ -104,25 +104,24 @@ export default App;`,
     lang: "Markdown",
     content: `# Pixel Portfolio 🎮
 
-## Interactive pixel-art portfolio website
+## Abdelrahman Ashraf's Interactive Portfolio
 
 A cozy pixel-art room where you can:
 - Walk around with a controllable character
 - Interact with objects in the room
-- Open a desktop with virtual apps
+- Open a desktop OS with virtual apps
 - Play retro games on the TV console
 
 ### Tech Stack
 - React + TypeScript
 - Vite + SWC
 - TailwindCSS
-- Canvas-based games
+- Oracle DB / WebLogic (enterprise exp)
 
-### Getting Started
-\`\`\`bash
-npm install
-npm run dev
-\`\`\`
+### Contact
+- Email: contact@abdelrahmanashraf.tech
+- GitHub: github.com/abdelrhamanashraf
+- LinkedIn: linkedin.com/in/abdelrahman-ashraf-a10070222
 
 Built with ❤️ and pixels.`,
   },

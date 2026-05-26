@@ -13,8 +13,11 @@ import DesktopShell from "./DesktopShell/DesktopShell";
 import PixelCharacter, { OBSTACLES, BOUNDS, POLY_OBSTACLES } from "./PixelCharacter";
 import CollisionEditor, { type FurnitureItem } from "./CollisionEditor";
 import RoomTheme, { type RoomThemeId, getThemeFilter } from "./RoomTheme";
+import SkillsDialog from "./SkillsDialog";
+import MobileControls from "./MobileControls";
+import musicFile from "/music.mp3?url";
 
-type Section = "education" | "tv" | "computer" | "bed" | null;
+type Section = "education" | "tv" | "computer" | "bed" | "music" | "skills" | null;
 
 const ROOM_IMAGES: Record<RoomThemeId, string> = {
   default: roomDefault,
@@ -47,7 +50,20 @@ const GameRoom = ({ theme = "default" }: GameRoomProps) => {
   const [pendingGameLaunch, setPendingGameLaunch] = useState<string | null>(null);
   const [isSleeping, setIsSleeping] = useState(false);
   const [sleepPhase, setSleepPhase] = useState<"off" | "fading" | "dark" | "waking">("off");
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [touchKeys, setTouchKeys] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio element
+  const getAudio = useCallback(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio(musicFile);
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.15; // Nice and low
+    }
+    return audioRef.current;
+  }, []);
 
   const handleHotspot = (name: string) => {
     if (name === "tv") {
@@ -81,6 +97,21 @@ const GameRoom = ({ theme = "default" }: GameRoomProps) => {
       }, 5200);
       return;
     }
+    if (name === "music") {
+      const audio = getAudio();
+      if (isMusicPlaying) {
+        audio.pause();
+        setIsMusicPlaying(false);
+      } else {
+        audio.play().catch(() => {});
+        setIsMusicPlaying(true);
+      }
+      return;
+    }
+    if (name === "skills") {
+      setActiveSection("skills");
+      return;
+    }
     setActiveSection(name as Section);
   };
 
@@ -110,7 +141,7 @@ const GameRoom = ({ theme = "default" }: GameRoomProps) => {
   const isFrozen = isZooming || showTV || isDesktopZooming || showDesktop || isSleeping;
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto select-none">
+    <div className="relative w-full select-none">
       {/* Room Image — zoom container */}
       <div
         className="relative transition-all duration-700 ease-in-out"
@@ -120,12 +151,16 @@ const GameRoom = ({ theme = "default" }: GameRoomProps) => {
           transform: isZooming || isDesktopZooming ? "scale(1.1)" : "scale(1)",
         }}
       >
-        <img
-          src={ROOM_IMAGES[theme]}
-          alt="Cozy pixel art room"
-          className="w-full h-auto rounded-lg"
-          draggable={false}
-        />
+        {/* Room image — locked to default aspect ratio (1025:934) so hotspots align across all themes */}
+        <div className="relative w-full" style={{ aspectRatio: "1025 / 934" }}>
+          <img
+            src={ROOM_IMAGES[theme]}
+            alt="Cozy pixel art room"
+            className="absolute inset-0 w-full h-full rounded-lg"
+            style={{ objectFit: "fill" }}
+            draggable={false}
+          />
+        </div>
 
         {/* Furniture items */}
         {furniture.map((item) => (
@@ -167,10 +202,13 @@ const GameRoom = ({ theme = "default" }: GameRoomProps) => {
           onClick={() => handleHotspot("tv")}
         />
 
-        {/* Computer Desk — polygon hotspot */}
+        {/* Computer Desk — rect hotspot */}
         <Hotspot
           label="Desktop"
-          polygonPoints="51,54.8 48.2,53.3 43.5,55.9 45.5,57.6 42.2,55.2 46.5,53.3 46.5,46.9 44.8,45.7 44.3,45.9 43.3,45.1 39.6,47.2 38.4,48.2 38.4,52.6 42.2,55.4 45.8,57.5"
+          left="37%"
+          top="44%"
+          width="15%"
+          height="14%"
           isGlowing={nearHotspot === "computer"}
           onClick={() => handleHotspot("computer")}
         />
@@ -183,13 +221,48 @@ const GameRoom = ({ theme = "default" }: GameRoomProps) => {
           onClick={() => handleHotspot("bed")}
         />
 
+        {/* Music Setup — rect hotspot */}
+        <Hotspot
+          label={isMusicPlaying ? "🎵 Pause Music" : "🎵 Play Music"}
+          left="60%"
+          top="47%"
+          width="12%"
+          height="10%"
+          isGlowing={nearHotspot === "music"}
+          onClick={() => handleHotspot("music")}
+        />
+
+        {/* Skills Shelf — rect hotspot */}
+        <Hotspot
+          label="Skills"
+          left="18%"
+          top="44%"
+          width="12%"
+          height="15%"
+          isGlowing={nearHotspot === "skills"}
+          onClick={() => handleHotspot("skills")}
+        />
+
         {/* Player Character */}
-        <PixelCharacter containerRef={containerRef} onReachHotspot={handleHotspot} onNearHotspot={setNearHotspot} characterSize={spriteSize} walkCharacterSize={walkSpriteSize} frozen={isFrozen} />
+        <PixelCharacter containerRef={containerRef} onReachHotspot={handleHotspot} onNearHotspot={setNearHotspot} characterSize={spriteSize} walkCharacterSize={walkSpriteSize} frozen={isFrozen} externalKeys={touchKeys} />
       </div>
+
+      {/* Mobile Touch Controls */}
+      <MobileControls
+        onDirectionChange={setTouchKeys}
+        onAction={() => { if (nearHotspot) handleHotspot(nearHotspot); }}
+        hasNearHotspot={!!nearHotspot}
+      />
 
       {/* Education Dialog */}
       <EducationDialog
         open={activeSection === "education"}
+        onOpenChange={(o) => !o && setActiveSection(null)}
+      />
+
+      {/* Skills Dialog */}
+      <SkillsDialog
+        open={activeSection === "skills"}
         onOpenChange={(o) => !o && setActiveSection(null)}
       />
 

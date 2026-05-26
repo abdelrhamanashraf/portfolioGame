@@ -6,17 +6,19 @@ interface EducationDialogProps {
 }
 
 const EDUCATION = {
-  degree: "Bachelor of Science in Computer Science",
-  university: "University Name",
-  year: "2020 — 2024",
-  gpa: "3.8 / 4.0",
-  specialization: "Software Engineering",
+  degree: "Bachelor's Degree in International Foreign Trade",
+  university: "English Department — Helwan University • Cairo",
+  year: "2015-2019"
 };
 
 const CERTIFICATIONS = [
-  { name: "AWS Cloud Practitioner", issuer: "Amazon Web Services", year: "2024" },
-  { name: "React Developer Certificate", issuer: "Meta", year: "2023" },
-  { name: "Full Stack Web Development", issuer: "freeCodeCamp", year: "2022" },
+  { name: "CS50x — Introduction to Computer Science", issuer: "Harvard University", year: "2022" },
+  { name: "Advanced Full-Stack Web Nanodegree", issuer: "Udacity", year: "2022" },
+  { name: "Full-Stack Web Development", issuer: "Udemy", year: "2023" },
+  { name: "Web Development Bootcamp", issuer: "DEPI", year: "2024" },
+  { name: "CCNA — Networking Basics", issuer: "Cisco", year: "2023" },
+  { name: "Oracle Database Administration", issuer: "Oracle", year: "2025" },
+  { name: "Oracle MiddleWare Administration", issuer: "Oracle", year: "2025" },
 ];
 
 const EducationDialog = ({ open, onOpenChange }: EducationDialogProps) => {
@@ -51,14 +53,7 @@ const EducationDialog = ({ open, onOpenChange }: EducationDialogProps) => {
                 <span className="text-muted-foreground">📅 Period:</span>{" "}
                 {EDUCATION.year}
               </p>
-              <p>
-                <span className="text-muted-foreground">🎯 Specialization:</span>{" "}
-                {EDUCATION.specialization}
-              </p>
-              <p>
-                <span className="text-muted-foreground">⭐ GPA:</span>{" "}
-                <span className="text-primary font-bold">{EDUCATION.gpa}</span>
-              </p>
+
             </div>
           </div>
 

@@ -16,20 +16,8 @@ const THEMES: { id: RoomThemeId; icon: string; label: string; color: string }[] 
 const ThemeSelector = ({ current, onChange }: ThemeSelectorProps) => {
   return (
     <div
-      className="flex items-center gap-1 px-3 py-1.5 rounded-full select-none"
-      style={{
-        background: "hsl(30 20% 12% / 0.85)",
-        border: "1px solid hsl(25 20% 25% / 0.6)",
-        backdropFilter: "blur(8px)",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
-      }}
+      className="flex flex-col items-center gap-1.5 select-none"
     >
-      <span
-        className="font-pixel text-[8px] mr-1 hidden sm:inline"
-        style={{ color: "hsl(30 15% 50%)" }}
-      >
-        Theme
-      </span>
       {THEMES.map((t) => {
         const isActive = current === t.id;
         return (

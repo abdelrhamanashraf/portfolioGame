@@ -290,7 +290,7 @@ const RoomTheme = ({ theme }: RoomThemeProps) => {
   if (theme === "default") return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg" style={{ zIndex: 15 }}>
+    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg" style={{ zIndex: 5 }}>
       {theme === "rainy" && <RainOverlay />}
       {theme === "snowy" && <SnowOverlay />}
       {theme === "sunny" && <SunnyOverlay />}

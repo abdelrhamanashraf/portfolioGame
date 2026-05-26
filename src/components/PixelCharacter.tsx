@@ -24,6 +24,7 @@ interface PixelCharacterProps {
   characterSize?: number;
   walkCharacterSize?: number;
   frozen?: boolean;
+  externalKeys?: Set<string>;
 }
 
 const SPEED = 0.8;
@@ -38,8 +39,11 @@ export const BOUNDS = {
   maxY: 99,
 };
 
-// Obstacle collision boxes (legacy rectangular — now using polygons instead)
+// Obstacle collision boxes (rectangular)
 export const OBSTACLES: { minX: number; maxX: number; minY: number; maxY: number }[] = [
+  { minX: 37, maxX: 52, minY: 44, maxY: 58 }, // Bookshelf upper
+  { minX: 60, maxX: 72, minY: 47, maxY: 57 }, // Music setup
+  { minX: 18, maxX: 30, minY: 44, maxY: 59 }, // Skills shelf
 ];
 
 // Polygon obstacle collision shapes (for angled/isometric objects)
@@ -53,7 +57,6 @@ export const POLY_OBSTACLES: { points: { x: number; y: number }[] }[] = [
   { points: [{x:15.3,y:77.2}, {x:17.4,y:76.1}, {x:18.5,y:76.3}, {x:18.9,y:75.2}, {x:20,y:74.2}, {x:21.4,y:73.5}, {x:23.2,y:73.3}, {x:24.6,y:74.1}, {x:25.9,y:76.3}, {x:26.4,y:78.8}, {x:25.9,y:80.7}, {x:24.8,y:82.4}, {x:22.7,y:83.4}, {x:20.7,y:83.5}, {x:18.7,y:83.5}, {x:16.6,y:82.9}, {x:14.9,y:82.1}, {x:13.9,y:80.8}, {x:13.7,y:79.2}] }, // chair
   { points: [{x:86.4,y:66}, {x:97.2,y:71.7}, {x:97.4,y:59.5}, {x:86.2,y:59}] }, // wall right
   { points: [{x:53.3,y:60.6}, {x:44.8,y:64.8}, {x:45,y:60.1}] }, // desk corner
-  { points: [{x:51,y:54.8}, {x:48.2,y:53.3}, {x:43.5,y:55.9}, {x:45.5,y:57.6}, {x:42.2,y:55.2}, {x:46.5,y:53.3}, {x:46.5,y:46.9}, {x:44.8,y:45.7}, {x:44.3,y:45.9}, {x:43.3,y:45.1}, {x:39.6,y:47.2}, {x:38.4,y:48.2}, {x:38.4,y:52.6}, {x:42.2,y:55.4}, {x:45.8,y:57.5}] }, // DESKTOP
 ];
 
 // Point-in-polygon test using ray casting algorithm
@@ -75,6 +78,8 @@ const HOTSPOT_ZONES = [
   { name: "tv", x: 9, y: 75, radius: 10, label: "🎮 TV" },
   { name: "computer", x: 48, y: 68, radius: 10, label: "💻 Desktop" },
   { name: "bed", x: 75, y: 72, radius: 10, label: "🛏️ Sleep" },
+  { name: "music", x: 66, y: 60, radius: 8, label: "🎵 Music" },
+  { name: "skills", x: 24, y: 62, radius: 8, label: "🛠️ Skills" },
 ];
 
 // Walk animation config per direction
@@ -117,7 +122,7 @@ const preloadPromise = Promise.all(
   })
 );
 
-const PixelCharacter = ({ containerRef, onReachHotspot, onNearHotspot, characterSize = CHARACTER_SIZE, walkCharacterSize = CHARACTER_SIZE, frozen = false }: PixelCharacterProps) => {
+const PixelCharacter = ({ containerRef, onReachHotspot, onNearHotspot, characterSize = CHARACTER_SIZE, walkCharacterSize = CHARACTER_SIZE, frozen = false, externalKeys }: PixelCharacterProps) => {
   const [pos, setPos] = useState({ x: 48, y: 75 });
   const [direction, setDirection] = useState<Direction>("down");
   const [isWalking, setIsWalking] = useState(false);
@@ -228,22 +233,25 @@ const PixelCharacter = ({ containerRef, onReachHotspot, onNearHotspot, character
       if (time - lastTime > 16) {
         lastTime = time;
         const keys = keysRef.current;
+        // Merge external (touch) keys
+        const allKeys = new Set(keys);
+        if (externalKeys) externalKeys.forEach(k => allKeys.add(k));
         let dx = 0,
           dy = 0;
 
-        if (!frozen && (keys.has("ArrowLeft") || keys.has("a"))) {
+        if (!frozen && (allKeys.has("ArrowLeft") || allKeys.has("a"))) {
           dx -= SPEED;
           setDirection("left");
         }
-        if (!frozen && (keys.has("ArrowRight") || keys.has("d"))) {
+        if (!frozen && (allKeys.has("ArrowRight") || allKeys.has("d"))) {
           dx += SPEED;
           setDirection("right");
         }
-        if (!frozen && (keys.has("ArrowUp") || keys.has("w"))) {
+        if (!frozen && (allKeys.has("ArrowUp") || allKeys.has("w"))) {
           dy -= SPEED;
           setDirection("up");
         }
-        if (!frozen && (keys.has("ArrowDown") || keys.has("s"))) {
+        if (!frozen && (allKeys.has("ArrowDown") || allKeys.has("s"))) {
           dy += SPEED;
           setDirection("down");
         }

@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { executeCommand, getPrompt, type CommandOutput } from "../terminal/commands";
+import SimulatedVim from "../terminal/SimulatedVim";
+import SimulatedNano from "../terminal/SimulatedNano";
 
 interface TerminalAppProps {
   onExit?: () => void;
@@ -22,9 +24,10 @@ const WELCOME: CommandOutput[] = [
 const TerminalApp = ({ onExit }: TerminalAppProps) => {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [input, setInput] = useState("");
-  const [cwd, setCwd] = useState("~");
+  const [cwd, setCwd] = useState("/home/kuro");
   const [cmdHist, setCmdHist] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
+  const [activeApp, setActiveApp] = useState<{ name: string; props: any } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +45,12 @@ const TerminalApp = ({ onExit }: TerminalAppProps) => {
     const output = executeCommand(trimmed, cwd, setCwd);
     if (output.length === 1 && output[0].text === "__CLEAR__") { setHistory([]); setInput(""); return; }
     if (output.length === 1 && output[0].text === "__EXIT__") { onExit?.(); return; }
+    if (output.length === 1 && output[0].isApp) {
+      setActiveApp({ name: output[0].isApp, props: output[0].appProps });
+      setHistory(p => [...p, { prompt: getPrompt(cwd), command: input, output: [] }]);
+      setInput("");
+      return;
+    }
 
     setHistory(p => [...p, { prompt: getPrompt(cwd), command: input, output }]);
     setInput("");
@@ -78,31 +87,53 @@ const TerminalApp = ({ onExit }: TerminalAppProps) => {
         boxShadow: "inset 0 0 60px rgba(0,255,0,0.03)",
       }} />
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 relative z-10" style={{ fontSize: "15px", lineHeight: "1.5" }}>
-        {WELCOME.map((l, i) => <div key={`w${i}`} style={{ color: l.color || "#0f0", textShadow: `0 0 6px ${l.color || '#0f0'}44` }}>{l.text || "\u00A0"}</div>)}
-        {history.map((entry, i) => (
-          <div key={i}>
-            <div className="flex">
-              <span style={{ color: "#0f8", textShadow: "0 0 6px #0f844" }}>{entry.prompt}</span>
-              <span style={{ color: "#fff", marginLeft: 8 }}>{entry.command}</span>
-            </div>
-            {entry.output.map((l, j) => (
-              <div key={j} style={{ color: l.color || "#ccc" }}>
-                <pre className="whitespace-pre-wrap m-0 font-retro text-[15px]" style={{ textShadow: l.color ? `0 0 4px ${l.color}44` : "none" }}>
-                  {l.text || "\u00A0"}
-                </pre>
+      {activeApp?.name === "vim" ? (
+        <div className="flex-1 relative z-10 w-full h-full">
+          <SimulatedVim 
+            {...activeApp.props} 
+            onExit={(newContent) => {
+              setActiveApp(null);
+              setTimeout(() => inputRef.current?.focus(), 10);
+            }} 
+          />
+        </div>
+      ) : activeApp?.name === "nano" ? (
+        <div className="flex-1 relative z-10 w-full h-full">
+          <SimulatedNano 
+            {...activeApp.props} 
+            onExit={(newContent) => {
+              setActiveApp(null);
+              setTimeout(() => inputRef.current?.focus(), 10);
+            }} 
+          />
+        </div>
+      ) : (
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 relative z-10" style={{ fontSize: "15px", lineHeight: "1.5" }}>
+          {WELCOME.map((l, i) => <div key={`w${i}`} style={{ color: l.color || "#0f0", textShadow: `0 0 6px ${l.color || '#0f0'}44` }}>{l.text || "\u00A0"}</div>)}
+          {history.map((entry, i) => (
+            <div key={i}>
+              <div className="flex">
+                <span style={{ color: "#0f8", textShadow: "0 0 6px #0f844" }}>{entry.prompt}</span>
+                <span style={{ color: "#fff", marginLeft: 8 }}>{entry.command}</span>
               </div>
-            ))}
-          </div>
-        ))}
-        <form onSubmit={handleSubmit} className="flex items-center">
-          <span style={{ color: "#0f8", textShadow: "0 0 6px #0f844" }}>{getPrompt(cwd)}</span>
-          <input ref={inputRef} type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent border-none outline-none ml-2 text-[15px] font-retro"
-            style={{ color: "#fff", caretColor: "#0f0", textShadow: "0 0 4px rgba(255,255,255,0.1)" }}
-            autoFocus spellCheck={false} autoComplete="off" />
-        </form>
-      </div>
+              {entry.output.map((l, j) => (
+                <div key={j} style={{ color: l.color || "#ccc" }}>
+                  <pre className="whitespace-pre-wrap m-0 font-retro text-[15px]" style={{ textShadow: l.color ? `0 0 4px ${l.color}44` : "none" }}>
+                    {l.text || "\u00A0"}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          ))}
+          <form onSubmit={handleSubmit} className="flex items-center">
+            <span style={{ color: "#0f8", textShadow: "0 0 6px #0f844" }}>{getPrompt(cwd)}</span>
+            <input ref={inputRef} type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}
+              className="flex-1 bg-transparent border-none outline-none ml-2 text-[15px] font-retro"
+              style={{ color: "#fff", caretColor: "#0f0", textShadow: "0 0 4px rgba(255,255,255,0.1)" }}
+              autoFocus spellCheck={false} autoComplete="off" />
+          </form>
+        </div>
+      )}
     </div>
   );
 };
